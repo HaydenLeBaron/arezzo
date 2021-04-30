@@ -1,0 +1,31 @@
+(composition
+  comp-name
+
+#:gl-tempo 	'X---Y-----
+#:gl-unitr	'4---3-----
+
+#:v1-root	'c---0---d-
+#:v2-root	'c---------
+#:v3-root	'c---------
+#:v4-root	'c---------
+
+#:v1-oct	'4----5----
+#:v2-oct 	'4---------
+#:v3-oct	'3---------
+#:v4-oct	'3---------
+
+#:v1-part	'1!=2,-3===
+#:v2-part	'3=@55-1===
+#:v3-part	'5==5543===
+#:v4-part	'1==5=5==,-
+)
+
+
+
+;; pitches 1!2@34$5%6^7,
+;; octave (0-9)
+;; abspitch (see existing grammar)
+;; tempo (see existing grammar)
+
+
+
