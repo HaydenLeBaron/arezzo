@@ -215,15 +215,35 @@
            ))
        event-list))
 
+
+
+
 ;; Converts generalized onset-events and hold-events to specific based on UNITR channel.
-;; TODO: NEXT
 (define (events->unitr-markers event-list)
   (map (lambda (event)
-         (identity event)
-         )
+         (if (onset-event? event)
+             (case (onset-event-char event)
+               [(#\1) (um-1)]
+               [(#\2) (um-2)]
+               [(#\3) (um-3)]
+               [(#\4) (um-4)]
+               [(#\5) (um-5)]
+               [(#\6) (um-6)]
+               [(#\7) (um-7)]
+               [(#\8) (um-8)]
+               [(#\9) (um-9)]
+               [(#\S) (um-16)]
+               [(#\T) (um-32)]
+               [(#\X) (um-64)]
+               [(#\O) (um-128)])
+            (raise-argument-error
+                  'events->unitr-markers
+                  "expected onset event but didn't receive it."
+                  event)))
        event-list))
 
 ;; Converts generalized onset-events and hold-events to specific based on ROOT channel.
+;; TODO
 (define (events->root-markers event-list)
   (map (lambda (event)
          (identity event)
@@ -290,6 +310,7 @@
 (define (holds->repeats event-list)
   (holds->repeats-helper (car event-list) event-list empty))
 
+;; Helper for holds->repeats (driver of this function)
 (define (holds->repeats-helper last-nonhold rest-of-list acc-list)
   (cond
     [(empty? rest-of-list) (reverse acc-list)]
