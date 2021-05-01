@@ -242,13 +242,30 @@
                   event)))
        event-list))
 
+
 ;; Converts generalized onset-events and hold-events to specific based on ROOT channel.
-;; TODO
 (define (events->root-markers event-list)
   (map (lambda (event)
-         (identity event)
-         )
+         (if (onset-event? event)
+             (case (onset-event-char event)
+               [(#\0) (rm-C)]
+               [(#\1) (rm-Csharp/Dflat)]
+               [(#\2) (rm-D)]
+               [(#\3) (rm-Dsharp/Eflat)]
+               [(#\4) (rm-E)]
+               [(#\5) (rm-F)]
+               [(#\6) (rm-Fsharp/Gflat)]
+               [(#\7) (rm-G)]
+               [(#\8) (rm-Gsharp/Aflat)]
+               [(#\9) (rm-A)]
+               [(#\A) (rm-Asharp/Bflat)]
+               [(#\B) (rm-B)])
+            (raise-argument-error
+                  'events->root-markers
+                  "expected onset event but didn't receive it."
+                  event)))
        event-list))
+
 
 ;; Converts generalized onset-events and hold-events to specific based on OCT channel.
 (define (events->oct-markers event-list)
@@ -381,18 +398,18 @@
  sonata
  'gl-tempo 'X---Y-----
  'gl-unitr '4---3-----
- 'v1-root 'c---0---d-
- 'v2-root 'c---------
- 'v3-root 'c---------
- 'v4-root 'c---------
- 'v1-oct '4----5----
- 'v2-oct '4---------
- 'v3-oct '3---------
- 'v4-oct '3---------
- 'v1-part '1!=2.-3===
- 'v2-part '3=@55-1===
- 'v3-part '5==5543===
- 'v4-part '1==5=5==.-
+ 'v1-root  '0------A--
+ 'v2-root  '1------B--
+ 'v3-root  '2---------
+ 'v4-root  '3---------
+ 'v1-oct   '4----5----
+ 'v2-oct   '4---------
+ 'v3-oct   '3---------
+ 'v4-oct   '3---------
+ 'v1-part  '1!=2.-3===
+ 'v2-part  '3=@55-1===
+ 'v3-part  '5==5543===
+ 'v4-part  '1==5=5==.-
  )
 
 
