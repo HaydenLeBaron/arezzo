@@ -167,9 +167,9 @@
 
 (struct pm-7 ()) ;; ....
 
-(struct rm-rest ()) ;; rest (r in alda)
+(struct pm-rest ()) ;; rest (r in alda)
 
-(struct rm-hold()) ;; hold (~ in alda)
+(struct pm-hold()) ;; hold (~ in alda)
 
 
 
@@ -216,6 +216,7 @@
        event-list))
 
 ;; Converts generalized onset-events and hold-events to specific based on UNITR channel.
+;; TODO: NEXT
 (define (events->unitr-markers event-list)
   (map (lambda (event)
          (identity event)
@@ -245,9 +246,9 @@
               [(#\6) (om-6)]
               [(#\7) (om-7)]
               [(#\8) (om-8)]
-              [(#\0) (om-9)])]
+              [(#\9) (om-9)])]
            [else (raise-argument-error
-                  'events->octave-markers
+                  'events->oct-markers
                   "expected onset or hold event, but received neither."
                   event)]
            ))
@@ -256,9 +257,39 @@
 ;; Converts generalized onset-events and hold-events to specific based on PART channel.
 (define (events->part-markers event-list)
   (map (lambda (event)
-         (identity event)
-         )
+         (cond
+           [(hold-event? event) (pm-hold)]
+           [(onset-event? event)
+            (case (onset-event-char event)
+              [(#\.) (pm-rest)]
+              [(#\1) (pm-1)]
+              [(#\!) (pm-1.5)]
+              [(#\2) (pm-2)]
+              [(#\@) (pm-2.5)]
+              [(#\3) (pm-3)]
+              [(#\4) (pm-4)]
+              [(#\$) (pm-4.5)]
+              [(#\5) (pm-5)]
+              [(#\%) (pm-5.5)]
+              [(#\6) (pm-6)]
+              [(#\^) (pm-6.5)]
+              [(#\7) (pm-7)])]
+           [else (raise-argument-error
+                  'events->part-markers
+                  "expected onset or hold event, but received neither."
+                  event)]
+           ))
        event-list))
+
+
+
+;; Takes every event in event list and returns an identical list
+;; except that all hold events are converted to being the same event
+;; as the last non-hold event.
+;; example: '(X hold Y hold hold Z hold) => '(X X Y Y Y Z Z)
+(define (holds->repeats event-list)
+  event-list ;; TODO: implement
+  )
 
 (define-syntax-rule
   (composition
@@ -287,11 +318,19 @@
     (comp-table->alda
      (hasheqv
       gl-tempo (events->tempo-markers (listof-symbol->listof-events gl-tempo-body))
-      gl-unitr (events->unitr-markers (listof-symbol->listof-events gl-unitr-body))
-      v1-root (events->root-markers (listof-symbol->listof-events v1-root-body))
-      v2-root (events->root-markers (listof-symbol->listof-events v2-root-body))
-      v3-root (events->root-markers (listof-symbol->listof-events v3-root-body))
-      v4-root (events->root-markers (listof-symbol->listof-events v4-root-body))
+      gl-unitr (events->unitr-markers (holds->repeats
+                                       (listof-symbol->listof-events gl-unitr-body)))
+      v1-root (events->root-markers (holds->repeats
+                                     (listof-symbol->listof-events v1-root-body)))
+                                    
+      v2-root (events->root-markers (holds->repeats
+                                     (listof-symbol->listof-events v2-root-body)))
+      
+      v3-root (events->root-markers (holds->repeats
+                                     (listof-symbol->listof-events v3-root-body)))
+      
+      v4-root (events->root-markers (holds->repeats
+                                     (listof-symbol->listof-events v4-root-body)))
       v1-oct (events->oct-markers (listof-symbol->listof-events v1-oct-body))
       v2-oct (events->oct-markers (listof-symbol->listof-events v2-oct-body))
       v3-oct (events->oct-markers (listof-symbol->listof-events v3-oct-body))
