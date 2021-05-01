@@ -1,7 +1,24 @@
 #lang racket
 
+(struct onset-event (char) #:transparent)
+(struct hold-event ())
+
+
 (define (symbol->list sym)
   (string->list (symbol->string sym)))
+
+;; Defines chars that represent "holds"
+(define (is-hold? c)
+  (or (equal? c #\-) (equal? c #\=)))
+
+(define (char->event c)
+  (if (is-hold? c)
+      (hold-event)
+      (onset-event c)))
+
+(define (listof-symbol->listof-events los)
+    (map char->event (symbol->list los)))
+  
 
 (define-syntax-rule
   (composition
@@ -22,23 +39,26 @@
    v4-part v4-part-body
   )
 
+  
   (define comp-name
     (hasheqv
-     gl-tempo (symbol->list gl-tempo-body)
-     gl-unitr (symbol->list gl-unitr-body)
-     v1-root (symbol->list v1-root-body)
-     v2-root (symbol->list v2-root-body)
-     v3-root (symbol->list v3-root-body)
-     v4-root (symbol->list v4-root-body)
-     v1-oct (symbol->list v1-oct-body)
-     v2-oct (symbol->list v2-oct-body)
-     v3-oct (symbol->list v3-oct-body)
-     v4-oct (symbol->list v4-oct-body)
-     v1-part (symbol->list v1-part-body)
-     v2-part (symbol->list v2-part-body)
-     v3-part (symbol->list v3-part-body)
-     v4-part (symbol->list v4-part-body)
+     gl-tempo (listof-symbol->listof-events gl-tempo-body)
+     gl-unitr (listof-symbol->listof-events gl-unitr-body)
+     v1-root (listof-symbol->listof-events v1-root-body)
+     v2-root (listof-symbol->listof-events v2-root-body)
+     v3-root (listof-symbol->listof-events v3-root-body)
+     v4-root (listof-symbol->listof-events v4-root-body)
+     v1-oct (listof-symbol->listof-events v1-oct-body)
+     v2-oct (listof-symbol->listof-events v2-oct-body)
+     v3-oct (listof-symbol->listof-events v3-oct-body)
+     v4-oct (listof-symbol->listof-events v4-oct-body)
+     v1-part (listof-symbol->listof-events v1-part-body)
+     v2-part (listof-symbol->listof-events v2-part-body)
+     v3-part (listof-symbol->listof-events v3-part-body)
+     v4-part (listof-symbol->listof-events v4-part-body)
      )))
+
+     
 
 
 ;; arezzo lite. Defines a composition named "sonata"
@@ -60,9 +80,7 @@
  'v4-part '1==5=5==.-
  )
 
-;; TODO
-(define (char->tempo-event)
-  (void))
+
 
 
 
