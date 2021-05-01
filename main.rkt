@@ -288,8 +288,19 @@
 ;; as the last non-hold event.
 ;; example: '(X hold Y hold hold Z hold) => '(X X Y Y Y Z Z)
 (define (holds->repeats event-list)
-  event-list ;; TODO: implement
-  )
+  (holds->repeats-helper (car event-list) event-list empty))
+
+(define (holds->repeats-helper last-nonhold rest-of-list acc-list)
+  (cond
+    [(empty? rest-of-list) (reverse acc-list)]
+    [else
+     (let ([curr (car rest-of-list)])
+     (cond
+       [(hold-event? curr)
+        (holds->repeats-helper last-nonhold (rest rest-of-list) (cons last-nonhold acc-list))]
+       [else
+        (holds->repeats-helper curr (rest rest-of-list) (cons curr acc-list))]))]))
+
 
 (define-syntax-rule
   (composition
