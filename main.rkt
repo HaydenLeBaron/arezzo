@@ -98,8 +98,9 @@ and each string represents an alda token.
                   [(om? elt)
                    (if (null? (om-octave elt))
                        " "
-                       (string-append "o" (number->string (om-octave elt))))
-                   ]
+                       (string-append "o" (number->string (om-octave elt))))]
+                  [(um? elt)
+                   (number->string (um-denom elt))]
                   [else 'other] ;; TODO: throw exception
                   )]))
       line))
@@ -173,20 +174,7 @@ and each string represents an alda token.
 ;; um-* (unitr [unit rhythm] marker)
 ;;===============================================
 
-(struct um-1 () #:transparent) ;; whole note
-(struct um-2 () #:transparent) ;; half note
-(struct um-3 () #:transparent) ;; ....
-(struct um-4 () #:transparent)
-(struct um-5 () #:transparent)
-(struct um-6 () #:transparent)
-(struct um-7 () #:transparent)
-(struct um-8 () #:transparent)
-(struct um-9 () #:transparent)
-(struct um-16 () #:transparent)
-(struct um-32 () #:transparent)
-(struct um-64 () #:transparent)
-(struct um-128 () #:transparent)
-
+(struct um (denom) #:transparent)
 
 ;;===============================================
 ;; om-* (oct [octave] marker)
@@ -277,19 +265,19 @@ and each string represents an alda token.
   (map (lambda (event)
          (if (onset-event? event)
              (case (onset-event-char event)
-               [(#\1) (um-1)]
-               [(#\2) (um-2)]
-               [(#\3) (um-3)]
-               [(#\4) (um-4)]
-               [(#\5) (um-5)]
-               [(#\6) (um-6)]
-               [(#\7) (um-7)]
-               [(#\8) (um-8)]
-               [(#\9) (um-9)]
-               [(#\S) (um-16)]
-               [(#\T) (um-32)]
-               [(#\X) (um-64)]
-               [(#\O) (um-128)])
+               [(#\1) (um 1)]
+               [(#\2) (um 2)]
+               [(#\3) (um 3)]
+               [(#\4) (um 4)]
+               [(#\5) (um 5)]
+               [(#\6) (um 6)]
+               [(#\7) (um 7)]
+               [(#\8) (um 8)]
+               [(#\9) (um 9)]
+               [(#\S) (um 16)]
+               [(#\T) (um 32)]
+               [(#\X) (um 64)]
+               [(#\O) (um 128)])
             (raise-argument-error
                   'events->unitr-markers
                   "expected onset event but didn't receive it."
