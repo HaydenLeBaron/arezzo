@@ -300,17 +300,17 @@ and each string represents an alda token.
      (map
       (lambda (elt)
         (cond
-          [(symbol? elt) " | "]
+          [(symbol? elt) "|"]
           [else (cond
                   [(tm? elt)
                    (if (null? (tm-tempo elt))
-                       " "
+                       ""
                        (string-append
                         "(tempo " (number->string (tm-tempo elt)) ")"))]
                   [(om? elt)
                    (if (null? (om-octave elt))
-                       " "
-                       (string-append "o" (number->string (om-octave elt))))]
+                       ""
+                       (string-append " o" (number->string (om-octave elt)) " "))]
                   [(um? elt)
                    (number->string (um-denom elt))]
                   [(note-pkg? elt)
@@ -324,6 +324,24 @@ and each string represents an alda token.
       line))
    hs-list))
 
+
+(define (format-alda-tok-list alda-toks)
+  (let* ([lines
+         (map (lambda (line) (string-join line "")) alda-toks
+       )]
+         [line-1 (list-ref lines 0)]
+         [line-2 (list-ref lines 1)]
+         [line-3 (list-ref lines 2)]
+         [line-4 (list-ref lines 3)])
+    (string-append
+     "piano \"piano-1\":" line-1 "\n"
+     "piano \"piano-2\":" line-2 "\n"
+     "piano \"piano-3\":" line-3 "\n"
+     "piano \"piano-4\":" line-4 "\n"
+    )))
+    
+    
+
 ;; Takes a hash-table representation of a composition `comp`
 ;; and returns a string of alda code representing it.
 
@@ -335,24 +353,27 @@ and each string represents an alda token.
   ;; |  ""          ""           ~3
 
 (define (comp-table->alda comp)
-  (h-slices->alda-tok-list (v-slices->h-slices
-   (map (lambda (t-i ur-i
-                   v1-r-i v2-r-i v3-r-i v4-r-i
-                   v1-o-i v2-o-i v3-o-i v4-o-i
-                   v1-p-i v2-p-i v3-p-i v4-p-i)
-         (list 'voice-1 t-i v1-o-i (list (list v1-p-i v1-r-i) ur-i)
-               'voice-2 t-i v2-o-i (list (list v2-p-i v2-r-i) ur-i)
-               'voice-3 t-i v3-o-i (list (list v3-p-i v3-r-i) ur-i)
-               'voice-4 t-i v4-o-i (list (list v4-p-i v4-r-i) ur-i)
-           )
-         )
-
-       (hash-ref comp 'gl-tempo) (hash-ref comp 'gl-unitr)
-       (hash-ref comp 'v1-root) (hash-ref comp 'v2-root) (hash-ref comp 'v3-root) (hash-ref comp 'v4-root)
-       (hash-ref comp 'v1-oct) (hash-ref comp 'v2-oct) (hash-ref comp 'v3-oct) (hash-ref comp 'v4-oct)
-       (hash-ref comp 'v1-part) (hash-ref comp 'v2-part) (hash-ref comp 'v3-part) (hash-ref comp 'v4-part)
-  )
-  )))
+  (format-alda-tok-list
+   (h-slices->alda-tok-list
+    (v-slices->h-slices
+     (map (lambda (t-i ur-i
+                       v1-r-i v2-r-i v3-r-i v4-r-i
+                       v1-o-i v2-o-i v3-o-i v4-o-i
+                       v1-p-i v2-p-i v3-p-i v4-p-i)
+                (list 'voice-1 t-i v1-o-i (list (list v1-p-i v1-r-i) ur-i)
+                      'voice-2 t-i v2-o-i (list (list v2-p-i v2-r-i) ur-i)
+                      'voice-3 t-i v3-o-i (list (list v3-p-i v3-r-i) ur-i)
+                      'voice-4 t-i v4-o-i (list (list v4-p-i v4-r-i) ur-i)
+                      )
+            )
+          
+          (hash-ref comp 'gl-tempo) (hash-ref comp 'gl-unitr)
+          (hash-ref comp 'v1-root) (hash-ref comp 'v2-root) (hash-ref comp 'v3-root) (hash-ref comp 'v4-root)
+          (hash-ref comp 'v1-oct) (hash-ref comp 'v2-oct) (hash-ref comp 'v3-oct) (hash-ref comp 'v4-oct)
+          (hash-ref comp 'v1-part) (hash-ref comp 'v2-part) (hash-ref comp 'v3-part) (hash-ref comp 'v4-part)
+          
+          )))
+   ))
 
 ;;===============================================
 ;; tm-* (tempo marker)
@@ -664,6 +685,24 @@ and each string represents an alda token.
  'v3-oct   '3---------
  'v4-oct   '3---------
  'v1-part  '1!=2.-3===
+ 'v2-part  '3=@55-1===
+ 'v3-part  '5==5543===
+ 'v4-part  '1==5=5==.-
+ )
+  
+(composition
+ mozart
+ 'gl-tempo 'O---------
+ 'gl-unitr '8---------
+ 'v1-root  '1---------
+ 'v2-root  '1---------
+ 'v3-root  '1---------
+ 'v4-root  '1---------
+ 'v1-oct   '4---34----
+ 'v2-oct   '4---------
+ 'v3-oct   '4---------
+ 'v4-oct   '4---------
+ 'v1-part  '1-35721.4-
  'v2-part  '3=@55-1===
  'v3-part  '5==5543===
  'v4-part  '1==5=5==.-
