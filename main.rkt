@@ -53,7 +53,7 @@
     (flatten
      (list-ref
       (for/list ([j (in-range 4)])       ;; TODO: replace 4 with number of channels
-        (for/list ([i (in-range 10)]) ;; TODO: replace 10 with length of list
+        (for/list ([i (in-range (length vs-list))])
           (list-ref 
            (list-ref (map group-by-voice vs-list)
                      i) j)))
@@ -334,10 +334,10 @@ and each string represents an alda token.
          [line-3 (list-ref lines 2)]
          [line-4 (list-ref lines 3)])
     (string-append
-     "piano \"piano-1\":" line-1 "\n"
-     "piano \"piano-2\":" line-2 "\n"
-     "piano \"piano-3\":" line-3 "\n"
-     "piano \"piano-4\":" line-4 "\n"
+     "piano \"piano-1\":" line-1 " "
+     "piano \"piano-2\":" line-2 " "
+     "piano \"piano-3\":" line-3 " "
+     "piano \"piano-4\":" line-4 " "
     )))
     
     
@@ -667,44 +667,4 @@ and each string represents an alda token.
       v3-part (events->part-markers (listof-symbol->listof-events v3-part-body))
       v4-part (events->part-markers (listof-symbol->listof-events v4-part-body))))))
 
-
-     
-
-
-;; arezzo lite. Defines a composition named "sonata"
-(composition
- sonata
- 'gl-tempo 'X---Y-----
- 'gl-unitr '4---3-----
- 'v1-root  '0------A--
- 'v2-root  '1------B--
- 'v3-root  '2---------
- 'v4-root  '3---------
- 'v1-oct   '4----5----
- 'v2-oct   '4---------
- 'v3-oct   '3---------
- 'v4-oct   '3---------
- 'v1-part  '1!=2.-3===
- 'v2-part  '3=@55-1===
- 'v3-part  '5==5543===
- 'v4-part  '1==5=5==.-
- )
-  
-(composition
- mozart
- 'gl-tempo 'O---------
- 'gl-unitr '8---------
- 'v1-root  '1---------
- 'v2-root  '1---------
- 'v3-root  '1---------
- 'v4-root  '1---------
- 'v1-oct   '4---34----
- 'v2-oct   '4---------
- 'v3-oct   '4---------
- 'v4-oct   '4---------
- 'v1-part  '1-35721.4-
- 'v2-part  '3=@55-1===
- 'v3-part  '5==5543===
- 'v4-part  '1==5=5==.-
- )
-  
+(provide composition)
