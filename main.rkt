@@ -88,11 +88,14 @@ and each string represents an alda token.
      (map
       (lambda (elt)
         (cond
-          [(symbol? elt) " "]
+          [(symbol? elt) " | "]
           [else (cond
-                  [(equal? elt (tm-10)) "(tempo 10)"]
-                  [(equal? elt (tm-20)) "(tempo 20)"]
-                  [(equal? elt (tm-240)) "(tempo 240)"]
+                  [(tm? elt)
+                   (if (null? (tm-tempo elt))
+                       " "
+                       (string-append
+                        "(tempo " (number->string (tm-tempo elt)) ")"))]
+                  ;.... ;; BKMRK
                   [else 'other] ;; TODO: throw exception
                   )]))
       line))
@@ -132,33 +135,10 @@ and each string represents an alda token.
 ;; tm-* (tempo marker)
 ;;===============================================
 
-(struct tm-10 () #:transparent) ;; tempo = 10
-(struct tm-20 () #:transparent) ;; tempo = 20
-(struct tm-30 () #:transparent) ;; ....
-(struct tm-40 () #:transparent)
-(struct tm-50 () #:transparent)
-(struct tm-60 () #:transparent)
-(struct tm-70 () #:transparent)
-(struct tm-80 () #:transparent)
-(struct tm-90 () #:transparent)
-(struct tm-100 () #:transparent)
-(struct tm-110 () #:transparent)
-(struct tm-120 () #:transparent)
-(struct tm-130 () #:transparent)
-(struct tm-140 () #:transparent)
-(struct tm-150 () #:transparent)
-(struct tm-160 () #:transparent)
-(struct tm-170 () #:transparent)
-(struct tm-180 () #:transparent)
-(struct tm-190 () #:transparent)
-(struct tm-200 () #:transparent)
-(struct tm-210 () #:transparent)
-(struct tm-220 () #:transparent)
-(struct tm-230 () #:transparent)
-(struct tm-240 () #:transparent)
-(struct tm-250 () #:transparent)
-(struct tm-260 () #:transparent)
-(struct tm-null () #:transparent) ;; No tempo change (maps to single alda whitespace)
+;; tempo must be a multiple of 10 or null.
+;; Null corresponds to no tempo change.
+(struct tm (tempo) #:transparent) 
+
 
 ;;===============================================
 ;; rm-* (root marker)
@@ -257,35 +237,35 @@ and each string represents an alda token.
 (define (events->tempo-markers event-list)
   (map (lambda (event)
          (cond
-           [(hold-event? event) (tm-null)]
+           [(hold-event? event) (tm null)]
            [(onset-event? event)
             (case (onset-event-char event)
-              [(#\A) (tm-10)]
-              [(#\B) (tm-20)]
-              [(#\C) (tm-30)]
-              [(#\D) (tm-40)]
-              [(#\E) (tm-50)]
-              [(#\F) (tm-60)]
-              [(#\G) (tm-70)]
-              [(#\H) (tm-80)]
-              [(#\I) (tm-90)]
-              [(#\J) (tm-100)]
-              [(#\K) (tm-110)]
-              [(#\L) (tm-120)]
-              [(#\M) (tm-130)]
-              [(#\N) (tm-140)]
-              [(#\O) (tm-150)]
-              [(#\P) (tm-160)]
-              [(#\Q) (tm-170)]
-              [(#\R) (tm-180)]
-              [(#\S) (tm-190)]
-              [(#\T) (tm-200)]
-              [(#\U) (tm-210)]
-              [(#\V) (tm-220)]
-              [(#\W) (tm-230)]
-              [(#\X) (tm-240)]
-              [(#\Y) (tm-250)]
-              [(#\Z) (tm-260)])]
+              [(#\A) (tm 10)]
+              [(#\B) (tm 20)]
+              [(#\C) (tm 30)]
+              [(#\D) (tm 40)]
+              [(#\E) (tm 50)]
+              [(#\F) (tm 60)]
+              [(#\G) (tm 70)]
+              [(#\H) (tm 80)]
+              [(#\I) (tm 90)]
+              [(#\J) (tm 100)]
+              [(#\K) (tm 110)]
+              [(#\L) (tm 120)]
+              [(#\M) (tm 130)]
+              [(#\N) (tm 140)]
+              [(#\O) (tm 150)]
+              [(#\P) (tm 160)]
+              [(#\Q) (tm 170)]
+              [(#\R) (tm 180)]
+              [(#\S) (tm 190)]
+              [(#\T) (tm 200)]
+              [(#\U) (tm 210)]
+              [(#\V) (tm 220)]
+              [(#\W) (tm 230)]
+              [(#\X) (tm 240)]
+              [(#\Y) (tm 250)]
+              [(#\Z) (tm 260)])]
            [else (raise-argument-error
                   'events->tempo-markers
                   "expected onset or hold event, but received neither."
