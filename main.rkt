@@ -95,7 +95,11 @@ and each string represents an alda token.
                        " "
                        (string-append
                         "(tempo " (number->string (tm-tempo elt)) ")"))]
-                  ;.... ;; BKMRK
+                  [(om? elt)
+                   (if (null? (om-octave elt))
+                       " "
+                       (string-append "o" (number->string (om-octave elt))))
+                   ]
                   [else 'other] ;; TODO: throw exception
                   )]))
       line))
@@ -188,17 +192,9 @@ and each string represents an alda token.
 ;; om-* (oct [octave] marker)
 ;;===============================================
 
-(struct om-0 () #:transparent) ;; octave 0
-(struct om-1 () #:transparent) ;; octave 1
-(struct om-2 () #:transparent) ;; octave 2
-(struct om-3 () #:transparent) ;; ....
-(struct om-4 () #:transparent)
-(struct om-5 () #:transparent)
-(struct om-6 () #:transparent)
-(struct om-7 () #:transparent)
-(struct om-8 () #:transparent)
-(struct om-9 () #:transparent)
-(struct om-null () #:transparent) ;; no octave change (maps to single alda whitespace)
+;; `octave` should be either a number or null
+;; a null octave indicates no change.
+(struct om (octave) #:transparent)
 
 
 
@@ -329,19 +325,19 @@ and each string represents an alda token.
 (define (events->oct-markers event-list)
   (map (lambda (event)
          (cond
-           [(hold-event? event) (om-null)]
+           [(hold-event? event) (om null)]
            [(onset-event? event)
             (case (onset-event-char event)
-              [(#\0) (om-0)]
-              [(#\1) (om-1)]
-              [(#\2) (om-2)]
-              [(#\3) (om-3)]
-              [(#\4) (om-4)]
-              [(#\5) (om-5)]
-              [(#\6) (om-6)]
-              [(#\7) (om-7)]
-              [(#\8) (om-8)]
-              [(#\9) (om-9)])]
+              [(#\0) (om 0)]
+              [(#\1) (om 1)]
+              [(#\2) (om 2)]
+              [(#\3) (om 3)]
+              [(#\4) (om 4)]
+              [(#\5) (om 5)]
+              [(#\6) (om 6)]
+              [(#\7) (om 7)]
+              [(#\8) (om 8)]
+              [(#\9) (om 9)])]
            [else (raise-argument-error
                   'events->oct-markers
                   "expected onset or hold event, but received neither."
