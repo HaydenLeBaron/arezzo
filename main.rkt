@@ -22,6 +22,39 @@
     (map char->event (symbol->list los)))
 
 
+(define (group-by-voice v-slice)
+  (match v-slice
+    [      
+     `(voice-1 ,tm-1 ,om-1 ((,pm-1 ,rm-1) ,um-1)
+       voice-2 ,tm-2 ,om-2 ((,pm-2 ,rm-2) ,um-2)
+       voice-3 ,tm-3 ,om-3 ((,pm-3 ,rm-3) ,um-3)
+       voice-4 ,tm-4 ,om-4 ((,pm-4 ,rm-4) ,um-4))
+     
+
+     `(
+       (voice-1 ,tm-1 ,om-1 ((,pm-1 ,rm-1) ,um-1))
+       (voice-2 ,tm-2 ,om-2 ((,pm-2 ,rm-2) ,um-2))
+       (voice-3 ,tm-3 ,om-3 ((,pm-3 ,rm-3) ,um-3))
+       (voice-4 ,tm-4 ,om-4 ((,pm-4 ,rm-4) ,um-4))
+       )
+     ]))
+
+
+
+;; Converts from "vertical slices" to "horizontal slices"
+(define (v-slices->h-slices vs-list)
+  (for/list ([k (in-range 4)])
+    (flatten (list-ref
+              (for/list ([j (in-range 4)])       ;; TODO: replace 4 with number of channels
+                (for/list ([i (in-range 10)]) ;; TODO: replace 10 with length of list
+                  (list-ref 
+                   (list-ref (map group-by-voice vs-list)
+                             i) j)))
+              k))
+    ))
+
+
+
 ;; Takes a hash-table representation of a composition `comp`
 ;; and returns a string of alda code representing it.
 
@@ -33,7 +66,7 @@
   ;; |  ""          ""           ~3
 
 (define (comp-table->alda comp)
-  ;(vert->horiz-slice
+  (v-slices->h-slices
    (map (lambda (t-i ur-i
                    v1-r-i v2-r-i v3-r-i v4-r-i
                    v1-o-i v2-o-i v3-o-i v4-o-i
@@ -50,7 +83,7 @@
        (hash-ref comp 'v1-oct) (hash-ref comp 'v2-oct) (hash-ref comp 'v3-oct) (hash-ref comp 'v4-oct)
        (hash-ref comp 'v1-part) (hash-ref comp 'v2-part) (hash-ref comp 'v3-part) (hash-ref comp 'v4-part)
   )
-  )
+  ))
 
 ;;===============================================
 ;; tm-* (tempo marker)
@@ -432,39 +465,158 @@
   )
   
 
-(define (m-test x)
-;; BKMRK
-  ;; right now matches: (m-test (list (car sonata)))
-  (match x
-    [
-     `( 
-       (voice-1
-         ,tm-1
-         ,om-1
-         ((,pm-1 ,rm-1) ,um-1)
-         voice-2
-         ,tm-2
-         ,om-2
-         ((,pm-2 ,rm-2) ,um-2)
-         voice-3
-         ,tm-3
-         ,om-3
-         ((,pm-3 ,rm-3) ,um-3)
-         voice-4
-         ,tm-4
-         ,om-4
-         ((,pm-4 ,rm-4) ,um-4))
-      
-      )
 
-     `(
-       (voice-1 (,tm-1 ,om-1 ((,pm-1 ,rm-1) ,um-1)))
-       (voice-2 (,tm-2 ,om-2 ((,pm-2 ,rm-2) ,um-2)))
-       (voice-3 (,tm-3 ,om-3 ((,pm-3 ,rm-3) ,um-3))) 
-       (voice-4 (,tm-4 ,om-4 ((,pm-4 ,rm-4) ,um-4))) 
-       )
-     ]))
-  
+#|
+'(((voice-1 #<tm-240> #<om-4> ((#<pm-1> #<rm-C>) #<um-4>))
+   (voice-2 #<tm-240> #<om-4> ((#<pm-3> #<rm-Csharp/Dflat>) #<um-4>))
+   (voice-3 #<tm-240> #<om-3> ((#<pm-5> #<rm-D>) #<um-4>))
+   (voice-4 #<tm-240> #<om-3> ((#<pm-1> #<rm-Dsharp/Eflat>) #<um-4>)))
+  ((voice-1 #<tm-null> #<om-null> ((#<pm-1.5> #<rm-C>) #<um-4>))
+   (voice-2
+    #<tm-null>
+    #<om-null>
+    ((#<pm-hold> #<rm-Csharp/Dflat>) #<um-4>))
+   (voice-3 #<tm-null> #<om-null> ((#<pm-hold> #<rm-D>) #<um-4>))
+   (voice-4
+    #<tm-null>
+    #<om-null>
+    ((#<pm-hold> #<rm-Dsharp/Eflat>) #<um-4>)))
+  ((voice-1 #<tm-null> #<om-null> ((#<pm-hold> #<rm-C>) #<um-4>))
+   (voice-2 #<tm-null> #<om-null> ((#<pm-2.5> #<rm-Csharp/Dflat>) #<um-4>))
+   (voice-3 #<tm-null> #<om-null> ((#<pm-hold> #<rm-D>) #<um-4>))
+   (voice-4
+    #<tm-null>
+    #<om-null>
+    ((#<pm-hold> #<rm-Dsharp/Eflat>) #<um-4>)))
+  ((voice-1 #<tm-null> #<om-null> ((#<pm-2> #<rm-C>) #<um-4>))
+   (voice-2 #<tm-null> #<om-null> ((#<pm-5> #<rm-Csharp/Dflat>) #<um-4>))
+   (voice-3 #<tm-null> #<om-null> ((#<pm-5> #<rm-D>) #<um-4>))
+   (voice-4 #<tm-null> #<om-null> ((#<pm-5> #<rm-Dsharp/Eflat>) #<um-4>)))
+  ((voice-1 #<tm-250> #<om-null> ((#<pm-rest> #<rm-C>) #<um-3>))
+   (voice-2 #<tm-250> #<om-null> ((#<pm-5> #<rm-Csharp/Dflat>) #<um-3>))
+   (voice-3 #<tm-250> #<om-null> ((#<pm-5> #<rm-D>) #<um-3>))
+   (voice-4
+    #<tm-250>
+    #<om-null>
+    ((#<pm-hold> #<rm-Dsharp/Eflat>) #<um-3>)))
+  ((voice-1 #<tm-null> #<om-5> ((#<pm-hold> #<rm-C>) #<um-3>))
+   (voice-2
+    #<tm-null>
+    #<om-null>
+    ((#<pm-hold> #<rm-Csharp/Dflat>) #<um-3>))
+   (voice-3 #<tm-null> #<om-null> ((#<pm-4> #<rm-D>) #<um-3>))
+   (voice-4 #<tm-null> #<om-null> ((#<pm-5> #<rm-Dsharp/Eflat>) #<um-3>)))
+  ((voice-1 #<tm-null> #<om-null> ((#<pm-3> #<rm-C>) #<um-3>))
+   (voice-2 #<tm-null> #<om-null> ((#<pm-1> #<rm-Csharp/Dflat>) #<um-3>))
+   (voice-3 #<tm-null> #<om-null> ((#<pm-3> #<rm-D>) #<um-3>))
+   (voice-4
+    #<tm-null>
+    #<om-null>
+    ((#<pm-hold> #<rm-Dsharp/Eflat>) #<um-3>)))
+  ((voice-1
+    #<tm-null>
+    #<om-null>
+    ((#<pm-hold> #<rm-Asharp/Bflat>) #<um-3>))
+   (voice-2 #<tm-null> #<om-null> ((#<pm-hold> #<rm-B>) #<um-3>))
+   (voice-3 #<tm-null> #<om-null> ((#<pm-hold> #<rm-D>) #<um-3>))
+   (voice-4
+    #<tm-null>
+    #<om-null>
+    ((#<pm-hold> #<rm-Dsharp/Eflat>) #<um-3>)))
+  ((voice-1
+    #<tm-null>
+    #<om-null>
+    ((#<pm-hold> #<rm-Asharp/Bflat>) #<um-3>))
+   (voice-2 #<tm-null> #<om-null> ((#<pm-hold> #<rm-B>) #<um-3>))
+   (voice-3 #<tm-null> #<om-null> ((#<pm-hold> #<rm-D>) #<um-3>))
+   (voice-4
+    #<tm-null>
+    #<om-null>
+    ((#<pm-rest> #<rm-Dsharp/Eflat>) #<um-3>)))
+  ((voice-1
+    #<tm-null>
+    #<om-null>
+    ((#<pm-hold> #<rm-Asharp/Bflat>) #<um-3>))
+   (voice-2 #<tm-null> #<om-null> ((#<pm-hold> #<rm-B>) #<um-3>))
+   (voice-3 #<tm-null> #<om-null> ((#<pm-hold> #<rm-D>) #<um-3>))
+   (voice-4
+    #<tm-null>
+    #<om-null>
+    ((#<pm-hold> #<rm-Dsharp/Eflat>) #<um-3>))))
+|#
+
+#|
+(map
+   (lambda (v-slice)
+     (m-test v-slice)
+    )
+    sonata)
+
+(filter (lambda (elt))
+(flatten-once (flatten-once
+   (map
+   (lambda (v-slice)
+     (m-test v-slice)
+    )
+    sonata)))
+
+
+'(((voice-1 (#<tm-240> #<om-4> ((#<pm-1> #<rm-C>) #<um-4>)))
+   (voice-2 (#<tm-240> #<om-4> ((#<pm-3> #<rm-Csharp/Dflat>) #<um-4>)))
+   (voice-3 (#<tm-240> #<om-3> ((#<pm-5> #<rm-D>) #<um-4>)))
+   (voice-4 (#<tm-240> #<om-3> ((#<pm-1> #<rm-Dsharp/Eflat>) #<um-4>))))
+  ((voice-1 (#<tm-null> #<om-null> ((#<pm-1.5> #<rm-C>) #<um-4>)))
+   (voice-2
+    (#<tm-null> #<om-null> ((#<pm-hold> #<rm-Csharp/Dflat>) #<um-4>)))
+   (voice-3 (#<tm-null> #<om-null> ((#<pm-hold> #<rm-D>) #<um-4>)))
+   (voice-4
+    (#<tm-null> #<om-null> ((#<pm-hold> #<rm-Dsharp/Eflat>) #<um-4>))))
+  ((voice-1 (#<tm-null> #<om-null> ((#<pm-hold> #<rm-C>) #<um-4>)))
+   (voice-2
+    (#<tm-null> #<om-null> ((#<pm-2.5> #<rm-Csharp/Dflat>) #<um-4>)))
+   (voice-3 (#<tm-null> #<om-null> ((#<pm-hold> #<rm-D>) #<um-4>)))
+   (voice-4
+    (#<tm-null> #<om-null> ((#<pm-hold> #<rm-Dsharp/Eflat>) #<um-4>))))
+  ((voice-1 (#<tm-null> #<om-null> ((#<pm-2> #<rm-C>) #<um-4>)))
+   (voice-2 (#<tm-null> #<om-null> ((#<pm-5> #<rm-Csharp/Dflat>) #<um-4>)))
+   (voice-3 (#<tm-null> #<om-null> ((#<pm-5> #<rm-D>) #<um-4>)))
+   (voice-4
+    (#<tm-null> #<om-null> ((#<pm-5> #<rm-Dsharp/Eflat>) #<um-4>))))
+  ((voice-1 (#<tm-250> #<om-null> ((#<pm-rest> #<rm-C>) #<um-3>)))
+   (voice-2 (#<tm-250> #<om-null> ((#<pm-5> #<rm-Csharp/Dflat>) #<um-3>)))
+   (voice-3 (#<tm-250> #<om-null> ((#<pm-5> #<rm-D>) #<um-3>)))
+   (voice-4
+    (#<tm-250> #<om-null> ((#<pm-hold> #<rm-Dsharp/Eflat>) #<um-3>))))
+  ((voice-1 (#<tm-null> #<om-5> ((#<pm-hold> #<rm-C>) #<um-3>)))
+   (voice-2
+    (#<tm-null> #<om-null> ((#<pm-hold> #<rm-Csharp/Dflat>) #<um-3>)))
+   (voice-3 (#<tm-null> #<om-null> ((#<pm-4> #<rm-D>) #<um-3>)))
+   (voice-4
+    (#<tm-null> #<om-null> ((#<pm-5> #<rm-Dsharp/Eflat>) #<um-3>))))
+  ((voice-1 (#<tm-null> #<om-null> ((#<pm-3> #<rm-C>) #<um-3>)))
+   (voice-2 (#<tm-null> #<om-null> ((#<pm-1> #<rm-Csharp/Dflat>) #<um-3>)))
+   (voice-3 (#<tm-null> #<om-null> ((#<pm-3> #<rm-D>) #<um-3>)))
+   (voice-4
+    (#<tm-null> #<om-null> ((#<pm-hold> #<rm-Dsharp/Eflat>) #<um-3>))))
+  ((voice-1
+    (#<tm-null> #<om-null> ((#<pm-hold> #<rm-Asharp/Bflat>) #<um-3>)))
+   (voice-2 (#<tm-null> #<om-null> ((#<pm-hold> #<rm-B>) #<um-3>)))
+   (voice-3 (#<tm-null> #<om-null> ((#<pm-hold> #<rm-D>) #<um-3>)))
+   (voice-4
+    (#<tm-null> #<om-null> ((#<pm-hold> #<rm-Dsharp/Eflat>) #<um-3>))))
+  ((voice-1
+    (#<tm-null> #<om-null> ((#<pm-hold> #<rm-Asharp/Bflat>) #<um-3>)))
+   (voice-2 (#<tm-null> #<om-null> ((#<pm-hold> #<rm-B>) #<um-3>)))
+   (voice-3 (#<tm-null> #<om-null> ((#<pm-hold> #<rm-D>) #<um-3>)))
+   (voice-4
+    (#<tm-null> #<om-null> ((#<pm-rest> #<rm-Dsharp/Eflat>) #<um-3>))))
+  ((voice-1
+    (#<tm-null> #<om-null> ((#<pm-hold> #<rm-Asharp/Bflat>) #<um-3>)))
+   (voice-2 (#<tm-null> #<om-null> ((#<pm-hold> #<rm-B>) #<um-3>)))
+   (voice-3 (#<tm-null> #<om-null> ((#<pm-hold> #<rm-D>) #<um-3>)))
+   (voice-4
+    (#<tm-null> #<om-null> ((#<pm-hold> #<rm-Dsharp/Eflat>) #<um-3>)))))
+  |#
 
 ;; NOTE: I found out it's not possible to call the macro expander again at runtime
 #|
