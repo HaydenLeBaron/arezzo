@@ -1,7 +1,7 @@
 #lang racket
 
 (struct onset-event (char) #:transparent)
-(struct hold-event ())
+(struct hold-event () #:transparent)
 
 
 (define (symbol->list sym)
@@ -54,6 +54,49 @@
     ))
 
 
+#| Converts list of form:
+
+'((voice-1
+   #<tm-240>
+   #<om-4>
+   #<pm-1>
+   #<rm-C>
+   #<um-4>
+   voice-1
+   #<tm-null>
+   #<om-null>
+   #<pm-1.5>
+   #<rm-C>
+   #<um-4>
+   voice-1
+   #<tm-null>
+   #<om-null>
+   #<pm-hold>
+   #<rm-C>
+   #<um-4>
+   voice-1
+   ....
+  (voice-2
+  ....))
+
+to a list of list of strings, where each inner list represents an alda line
+and each string represents an alda token.
+|#
+(define (h-slices->alda-tok-list hs-list)
+  (map
+   (lambda (line)
+     (map
+      (lambda (elt)
+        (cond
+          [(symbol? elt) " "]
+          [else (cond
+                  [(equal? elt (tm-10)) "(tempo 10)"]
+                  [(equal? elt (tm-20)) "(tempo 20)"]
+                  [(equal? elt (tm-240)) "(tempo 240)"]
+                  [else 'other] ;; TODO: throw exception
+                  )]))
+      line))
+   hs-list))
 
 ;; Takes a hash-table representation of a composition `comp`
 ;; and returns a string of alda code representing it.
@@ -66,7 +109,7 @@
   ;; |  ""          ""           ~3
 
 (define (comp-table->alda comp)
-  (v-slices->h-slices
+  (h-slices->alda-tok-list (v-slices->h-slices
    (map (lambda (t-i ur-i
                    v1-r-i v2-r-i v3-r-i v4-r-i
                    v1-o-i v2-o-i v3-o-i v4-o-i
@@ -83,62 +126,62 @@
        (hash-ref comp 'v1-oct) (hash-ref comp 'v2-oct) (hash-ref comp 'v3-oct) (hash-ref comp 'v4-oct)
        (hash-ref comp 'v1-part) (hash-ref comp 'v2-part) (hash-ref comp 'v3-part) (hash-ref comp 'v4-part)
   )
-  ))
+  )))
 
 ;;===============================================
 ;; tm-* (tempo marker)
 ;;===============================================
 
-(struct tm-10 ()) ;; tempo = 10
-(struct tm-20 ()) ;; tempo = 20
-(struct tm-30 ()) ;; ....
-(struct tm-40 ())
-(struct tm-50 ())
-(struct tm-60 ())
-(struct tm-70 ())
-(struct tm-80 ())
-(struct tm-90 ())
-(struct tm-100 ())
-(struct tm-110 ())
-(struct tm-120 ())
-(struct tm-130 ())
-(struct tm-140 ())
-(struct tm-150 ())
-(struct tm-160 ())
-(struct tm-170 ())
-(struct tm-180 ())
-(struct tm-190 ())
-(struct tm-200 ())
-(struct tm-210 ())
-(struct tm-220 ())
-(struct tm-230 ())
-(struct tm-240 ())
-(struct tm-250 ())
-(struct tm-260 ())
-(struct tm-null ()) ;; No tempo change (maps to single alda whitespace)
+(struct tm-10 () #:transparent) ;; tempo = 10
+(struct tm-20 () #:transparent) ;; tempo = 20
+(struct tm-30 () #:transparent) ;; ....
+(struct tm-40 () #:transparent)
+(struct tm-50 () #:transparent)
+(struct tm-60 () #:transparent)
+(struct tm-70 () #:transparent)
+(struct tm-80 () #:transparent)
+(struct tm-90 () #:transparent)
+(struct tm-100 () #:transparent)
+(struct tm-110 () #:transparent)
+(struct tm-120 () #:transparent)
+(struct tm-130 () #:transparent)
+(struct tm-140 () #:transparent)
+(struct tm-150 () #:transparent)
+(struct tm-160 () #:transparent)
+(struct tm-170 () #:transparent)
+(struct tm-180 () #:transparent)
+(struct tm-190 () #:transparent)
+(struct tm-200 () #:transparent)
+(struct tm-210 () #:transparent)
+(struct tm-220 () #:transparent)
+(struct tm-230 () #:transparent)
+(struct tm-240 () #:transparent)
+(struct tm-250 () #:transparent)
+(struct tm-260 () #:transparent)
+(struct tm-null () #:transparent) ;; No tempo change (maps to single alda whitespace)
 
 ;;===============================================
 ;; rm-* (root marker)
 ;;===============================================
 
-(struct rm-C ())
-(struct rm-Csharp/Dflat ())
+(struct rm-C () #:transparent)
+(struct rm-Csharp/Dflat () #:transparent)
  
-(struct rm-D ())
-(struct rm-Dsharp/Eflat ())
+(struct rm-D () #:transparent)
+(struct rm-Dsharp/Eflat () #:transparent)
 
-(struct rm-E ())
+(struct rm-E () #:transparent)
 
 (struct rm-F ())
-(struct rm-Fsharp/Gflat ())
+(struct rm-Fsharp/Gflat () #:transparent)
 
-(struct rm-G ())
-(struct rm-Gsharp/Aflat ())
+(struct rm-G () #:transparent)
+(struct rm-Gsharp/Aflat () #:transparent)
 
-(struct rm-A ())
-(struct rm-Asharp/Bflat ())
+(struct rm-A () #:transparent)
+(struct rm-Asharp/Bflat () #:transparent)
 
-(struct rm-B ())
+(struct rm-B () #:transparent)
 
 
 
@@ -146,36 +189,36 @@
 ;; um-* (unitr [unit rhythm] marker)
 ;;===============================================
 
-(struct um-1 ()) ;; whole note
-(struct um-2 ()) ;; half note
-(struct um-3 ()) ;; ....
-(struct um-4 ())
-(struct um-5 ())
-(struct um-6 ())
-(struct um-7 ())
-(struct um-8 ())
-(struct um-9 ())
-(struct um-16 ())
-(struct um-32 ())
-(struct um-64 ())
-(struct um-128 ())
+(struct um-1 () #:transparent) ;; whole note
+(struct um-2 () #:transparent) ;; half note
+(struct um-3 () #:transparent) ;; ....
+(struct um-4 () #:transparent)
+(struct um-5 () #:transparent)
+(struct um-6 () #:transparent)
+(struct um-7 () #:transparent)
+(struct um-8 () #:transparent)
+(struct um-9 () #:transparent)
+(struct um-16 () #:transparent)
+(struct um-32 () #:transparent)
+(struct um-64 () #:transparent)
+(struct um-128 () #:transparent)
 
 
 ;;===============================================
 ;; om-* (oct [octave] marker)
 ;;===============================================
 
-(struct om-0 ()) ;; octave 0
-(struct om-1 ()) ;; octave 1
-(struct om-2 ()) ;; octave 2
-(struct om-3 ()) ;; ....
-(struct om-4 ())
-(struct om-5 ())
-(struct om-6 ())
-(struct om-7 ())
-(struct om-8 ())
-(struct om-9 ())
-(struct om-null ()) ;; no octave change (maps to single alda whitespace)
+(struct om-0 () #:transparent) ;; octave 0
+(struct om-1 () #:transparent) ;; octave 1
+(struct om-2 () #:transparent) ;; octave 2
+(struct om-3 () #:transparent) ;; ....
+(struct om-4 () #:transparent)
+(struct om-5 () #:transparent)
+(struct om-6 () #:transparent)
+(struct om-7 () #:transparent)
+(struct om-8 () #:transparent)
+(struct om-9 () #:transparent)
+(struct om-null () #:transparent) ;; no octave change (maps to single alda whitespace)
 
 
 
@@ -183,28 +226,28 @@
 ;; pm=* (part marker)
 ;;===============================================
 
-(struct pm-1 ())   ;; 1st note of chromatic scale (imagine c key on piano, but transposed)
-(struct pm-1.5 ()) ;; 2nd note of chromatic scale (imagine c# key on piano, but transposed)
+(struct pm-1 () #:transparent)   ;; 1st note of chromatic scale (imagine c key on piano, but transposed)
+(struct pm-1.5 () #:transparent) ;; 2nd note of chromatic scale (imagine c# key on piano, but transposed)
 
-(struct pm-2 ()) ;; ....
-(struct pm-2.5 ()) 
+(struct pm-2 () #:transparent) ;; ....
+(struct pm-2.5 () #:transparent) 
 
-(struct pm-3 ())
+(struct pm-3 () #:transparent)
 
-(struct pm-4 ())
-(struct pm-4.5 ()) 
+(struct pm-4 () #:transparent)
+(struct pm-4.5 () #:transparent) 
 
-(struct pm-5 ())
-(struct pm-5.5 ()) 
+(struct pm-5 () #:transparent)
+(struct pm-5.5 () #:transparent) 
 
-(struct pm-6 ())
-(struct pm-6.5 ())
+(struct pm-6 () #:transparent)
+(struct pm-6.5 () #:transparent)
 
-(struct pm-7 ()) ;; ....
+(struct pm-7 () #:transparent) ;; ....
 
-(struct pm-rest ()) ;; rest (r in alda)
+(struct pm-rest () #:transparent) ;; rest (r in alda)
 
-(struct pm-hold()) ;; hold (~ in alda)
+(struct pm-hold() #:transparent) ;; hold (~ in alda)
 
 
 
