@@ -21,7 +21,6 @@
 (define (listof-symbol->listof-events los)
     (map char->event (symbol->list los)))
 
-(struct note-pkg (x y) #:transparent)
 
 (define (group-by-voice v-slice)
   (let ([pkg-note (lambda (x y) (note-pkg x y))])
@@ -60,6 +59,12 @@
                      i) j)))
       k))
     ))
+
+;; TODO: implement ;; BKMRK
+;; Converts note-pkg to an equivalent alda string
+(define (note-pkg->alda-str np)
+  np
+  )
 
 
 #| Converts list of form:
@@ -110,7 +115,13 @@ and each string represents an alda token.
                        (string-append "o" (number->string (om-octave elt))))]
                   [(um? elt)
                    (number->string (um-denom elt))]
-                  [else elt] ;; TODO: throw exception
+                  [(note-pkg? elt)
+                   (note-pkg->alda-str elt)
+                   ]
+                  [else (raise-argument-error
+                         'h-slices->alda-tok-list
+                         "expected tm, om, um, or note-pkg--but didn't recieve any."
+                         elt)]
                   )]))
       line))
    hs-list))
@@ -222,7 +233,8 @@ and each string represents an alda token.
 
 (struct pm-hold() #:transparent) ;; hold (~ in alda)
 
-
+;; NOTE PACKAGE
+(struct note-pkg (pm rm) #:transparent)
 
 
 
