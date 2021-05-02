@@ -21,8 +21,10 @@
 (define (listof-symbol->listof-events los)
     (map char->event (symbol->list los)))
 
+(struct note-pkg (x y) #:transparent)
 
 (define (group-by-voice v-slice)
+  (let ([pkg-note (lambda (x y) (note-pkg x y))])
   (match v-slice
     [      
      `(voice-1 ,tm-1 ,om-1 ((,pm-1 ,rm-1) ,um-1)
@@ -31,26 +33,32 @@
        voice-4 ,tm-4 ,om-4 ((,pm-4 ,rm-4) ,um-4))
      
 
+(let ([note-1 (pkg-note pm-1 rm-1)]
+      [note-2 (pkg-note pm-2 rm-2)]
+      [note-3 (pkg-note pm-3 rm-3)]
+      [note-4 (pkg-note pm-4 rm-4)])
      `(
-       (voice-1 ,tm-1 ,om-1 ((,pm-1 ,rm-1) ,um-1))
-       (voice-2 ,tm-2 ,om-2 ((,pm-2 ,rm-2) ,um-2))
-       (voice-3 ,tm-3 ,om-3 ((,pm-3 ,rm-3) ,um-3))
-       (voice-4 ,tm-4 ,om-4 ((,pm-4 ,rm-4) ,um-4))
-       )
-     ]))
+       (voice-1 ,tm-1 ,om-1 ((,note-1) ,um-1))
+       (voice-2 ,tm-2 ,om-2 ((,note-2) ,um-2))
+       (voice-3 ,tm-3 ,om-3 ((,note-3) ,um-3))
+       (voice-4 ,tm-4 ,om-4 ((,note-4) ,um-4))
+       ))
+     ])))
+
 
 
 
 ;; Converts from "vertical slices" to "horizontal slices"
 (define (v-slices->h-slices vs-list)
   (for/list ([k (in-range 4)])
-    (flatten (list-ref
-              (for/list ([j (in-range 4)])       ;; TODO: replace 4 with number of channels
-                (for/list ([i (in-range 10)]) ;; TODO: replace 10 with length of list
-                  (list-ref 
-                   (list-ref (map group-by-voice vs-list)
-                             i) j)))
-              k))
+    (flatten
+     (list-ref
+      (for/list ([j (in-range 4)])       ;; TODO: replace 4 with number of channels
+        (for/list ([i (in-range 10)]) ;; TODO: replace 10 with length of list
+          (list-ref 
+           (list-ref (map group-by-voice vs-list)
+                     i) j)))
+      k))
     ))
 
 
@@ -83,6 +91,7 @@ to a list of list of strings, where each inner list represents an alda line
 and each string represents an alda token.
 |#
 (define (h-slices->alda-tok-list hs-list)
+  ;; Convert tm, om, and um
   (map
    (lambda (line)
      (map
@@ -101,7 +110,7 @@ and each string represents an alda token.
                        (string-append "o" (number->string (om-octave elt))))]
                   [(um? elt)
                    (number->string (um-denom elt))]
-                  [else 'other] ;; TODO: throw exception
+                  [else elt] ;; TODO: throw exception
                   )]))
       line))
    hs-list))
