@@ -1,42 +1,6 @@
 #lang racket
 
-(require arezzo-lite/main)
-
-(composition
- sonata
- 'gl-tempo 'X---Y-----
- 'gl-unitr '4---3-----
- 'v1-root  '0------A--
- 'v2-root  '1------B--
- 'v3-root  '2---------
- 'v4-root  '3---------
- 'v1-oct   '4----5----
- 'v2-oct   '4---------
- 'v3-oct   '3---------
- 'v4-oct   '3---------
- 'v1-part  '1!=2.-3===
- 'v2-part  '3=@55-1===
- 'v3-part  '5==5543===
- 'v4-part  '1==5=5==.-
- )
-
-(composition
- mozart
- 'gl-tempo 'O---------
- 'gl-unitr '8---------
- 'v1-root  '1---------
- 'v2-root  '1---------
- 'v3-root  '1---------
- 'v4-root  '1---------
- 'v1-oct   '4---34----
- 'v2-oct   '4---------
- 'v3-oct   '4---------
- 'v4-oct   '4---------
- 'v1-part  '1-35721.4-
- 'v2-part  '3=@55-1===
- 'v3-part  '5==5543===
- 'v4-part  '1==5=5==.-
- )
+(require arezzo-lite/base)
 
 (composition
  nearer-my-god-to-thee

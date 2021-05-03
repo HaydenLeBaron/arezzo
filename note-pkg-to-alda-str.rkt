@@ -1,5 +1,9 @@
 #lang racket
 
+(require "structs.rkt")
+(provide note-pkg->alda-str)
+
+
 ;; Converts note-pkg to an equivalent alda string
 (define (note-pkg->alda-str npkg)
   (let ([npkg-pm (note-pkg-pm npkg)]
