@@ -1,6 +1,6 @@
 #lang racket
 
-(require "main.rkt")
+(require arezzo-lite/main)
 
 (composition
  sonata

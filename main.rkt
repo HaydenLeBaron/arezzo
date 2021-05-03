@@ -673,10 +673,14 @@ and each string represents an alda token.
 ;; Takes the id of a composition and plays it out loud. Requires
 ;; Alda server to be running. Start the alda server by running `alda up`.
 (define (play! comp-id)
-  (let ([alda-exec-path
-         (car (string-split (with-output-to-string (λ()
-                                                     (system "which alda"))) "\n"))])
-    (system* alda-exec-path "play" "--code" comp-id))
-  )
+
+  (with-handlers
+    ([exn:fail:contract?
+      (λ (exn) "play! does nothing when run from the racket REPL (or DrRacket). Run `racket this-file.rkt` in a shell while `alda up` is running to hear live playback.")])
+    (let ([alda-exec-path
+           (car (string-split (with-output-to-string (λ()
+                                                       (system "which alda"))) "\n"))])
+      (system* alda-exec-path "play" "--code" comp-id))
+    ))
 
 (provide play!)

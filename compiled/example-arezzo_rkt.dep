@@ -1,0 +1,1 @@
+("8.0" ta6osx ("e25aaf9b0322c99bb4276b1671a65c6135ab45a0" . "3ec6afff044afab50afb4801a48a9ad659c46856") (collects #"arezzo-lite" #"main.rkt") (collects #"racket" #"main.rkt") (collects #"racket" #"runtime-config.rkt"))
