@@ -668,3 +668,15 @@ and each string represents an alda token.
       v4-part (events->part-markers (listof-symbol->listof-events v4-part-body))))))
 
 (provide composition)
+
+
+;; Takes the id of a composition and plays it out loud. Requires
+;; Alda server to be running. Start the alda server by running `alda up`.
+(define (play! comp-id)
+  (let ([alda-exec-path
+         (car (string-split (with-output-to-string (λ()
+                                                     (system "which alda"))) "\n"))])
+    (system* alda-exec-path "play" "--code" comp-id))
+  )
+
+(provide play!)
