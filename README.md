@@ -181,3 +181,4 @@ You can find more exmaples in `./examples/`
 (play! nearer-my-god-to-thee-minor)
 ```
 
+To hear audio playback, run the file as if it was a regular racket file WHILE THE ALDA SERVER IS RUNNING
