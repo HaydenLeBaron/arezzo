@@ -1,7 +1,7 @@
 # README
 
 
-Arezzo-lite is a racket module language that aims to be a compositional scratch pad for musicians writing quartets.
+Arezzo is a racket module language that aims to be a compositional scratch pad for musicians writing quartets.
 
 
 ## Features
